@@ -1,0 +1,6 @@
+pkg/
+.idea/
+.redcar/
+*.trc
+nbproject/
+doc/

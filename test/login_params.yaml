@@ -1,0 +1,15 @@
+system1:
+  ashost: 10.0.0.9
+  client: "001"
+  sysnr: "42"
+  user: DDIC
+  passwd: ch4ngeme
+  trace: 0
+
+system2:
+  ashost: 10.0.0.9
+  client: "001"
+  sysnr: "42"
+  user: DEVELOPER
+  passwd: ch4ngeme
+  trace: 0
