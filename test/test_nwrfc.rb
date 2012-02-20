@@ -114,6 +114,16 @@ class TestNWRFC < Test::Unit::TestCase
     assert_equal(1, function.parameter_count)
   end
 
+  # Test setting and getting string
+  def test_string
+    function = Function.new("MY_STRING")
+    parameter = Parameter.new(:name => "RFC_STRING", :type => :RFCTYPE_STRING, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    fc = function.get_function_call
+    fc[:RFC_STRING] = "Hello, how are you?"
+    assert_equal("Hello, how are you?", fc[:RFC_STRING], "RFC_STRING")
+  end
+
   # Test setting and getting xstring
   def test_xstring
     function = Function.new("MY_XSTRING")

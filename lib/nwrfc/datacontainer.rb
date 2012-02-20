@@ -148,6 +148,9 @@ module NWRFC
       when :RFCTYPE_XMLDATA
         raise "Unsupported type RFCTYPE_XMLDATA (no longer used)" #You should never run into this
       when :RFCTYPE_STRING
+        stval = value.cU
+        m = FFI::MemoryPointer.from_string stval
+        NWRFCLib.set_string(@handle, member.cU, m, value.size, @error)
       when :RFCTYPE_XSTRING
         m = FFI::MemoryPointer.new value.size
         m.put_bytes 0, value
