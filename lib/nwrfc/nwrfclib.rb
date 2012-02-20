@@ -73,11 +73,11 @@ end
 # Library wrapper around NW RFC SDK shared library using RUBY-FFI
 module NWRFCLib
 
-  Cutf8_to_utf16le = Iconv.new("UTF-16LE", "UTF8")
-  Cutf16le_to_utf8 = Iconv.new("UTF8", "UTF-16LE")
+  Cutf8_to_utf16le = Iconv.new("UTF-16LE", "UTF-8")
+  Cutf16le_to_utf8 = Iconv.new("UTF-8", "UTF-16LE")
 
   extend FFI::Library
-  ffi_lib '/home/martin/nwrfcsdk/lib/libsapnwrfc.so'
+  ffi_lib 'sapnwrfc'
 
   # Multiplier for providing correct byte size for String passed to RFC library
   #TODO: Make platform-dependent size based on RUBY_PLATFORM
