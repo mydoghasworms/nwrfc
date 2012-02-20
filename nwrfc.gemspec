@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'nwrfc'
-  s.version     = '0.0.0'
-  s.date        = '2012-01-30'
+  s.version     = '0.0.1'
+  s.date        = '2012-02-20'
   s.summary     = "SAP Netweaver RFC Library Wrapper"
   s.description = "SAP Netweaver RFC Library Wrapper using Ruby-FFI"
   s.authors     = ["Martin Ceronio"]
