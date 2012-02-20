@@ -9,8 +9,6 @@ require 'yaml'
 
 include NWRFC
 
-require 'ruby-debug'
-
 $login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
 
 class TestNWRFC < Test::Unit::TestCase
