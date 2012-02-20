@@ -130,7 +130,7 @@ module NWRFCLib
     :RFC_TABLES, 7
   )
 
-  RFCTYPE = enum(
+  RFC_TYPE = enum(
     :RFCTYPE_CHAR   , 0,
     :RFCTYPE_DATE   , 1,
     :RFCTYPE_BCD    , 2,
@@ -243,6 +243,23 @@ module NWRFCLib
     layout :handle, :pointer
   end
 
+  class RFC_DECF16 < FFI::Union
+    layout :bytes, [:uchar, 8],
+      :align, :double
+  end
+
+#  class SAP_MAX_ALIGN_T < FFI::Union
+#    layout :align1, :long,
+#      :align2, :double,
+#      :align3, :pointer,
+#      :align4,
+#  end
+
+#  class RFC_DECF34 < FFI::Union
+#    layout :bytes, [:uchar, 16],
+#      :align, 16
+#  end
+
   #############################################################################################################
   # ATTACH FUNCTIONS
   # The functions here were obtained by parsing content from the doxygen files from the documentation
@@ -350,7 +367,8 @@ module NWRFCLib
     [:set_bytes, :RfcSetBytes, [:pointer, :pointer, :pointer, :uint, :pointer], :int],
     [:set_chars, :RfcSetChars, [:pointer, :pointer, :pointer, :uint, :pointer], :int],
     [:set_date, :RfcSetDate, [:pointer, :pointer, :pointer, :pointer], :int],
-    [:set_dec_f16, :RfcSetDecF16, [:pointer, :pointer, :pointer, :pointer], :int],
+    #[:set_dec_f16, :RfcSetDecF16, [:pointer, :pointer, :pointer, :pointer], :int],
+    [:set_dec_f16, :RfcSetDecF16, [:pointer, :pointer, RFC_DECF16.by_value, :pointer], :int],
     [:set_dec_f34, :RfcSetDecF34, [:pointer, :pointer, :pointer, :pointer], :int],
     [:set_float, :RfcSetFloat, [:pointer, :pointer, :double, :pointer], :int],
     [:set_ini_path, :RfcSetIniPath, [:pointer, :pointer], :int],

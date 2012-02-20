@@ -11,7 +11,7 @@ include NWRFC
 
 require 'ruby-debug'
 
-$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system3"]
+$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
 
 class TestNWRFC < Test::Unit::TestCase
   def test_steps
@@ -107,5 +107,42 @@ class TestNWRFC < Test::Unit::TestCase
     assert fc[:EXP] == fc[:IMP]
     connection.disconnect
   end
+
+  # Test creating functions without server definition
+  def test_new_function
+    function = Function.new("MY_FUNCTION")
+    parameter = Parameter.new(:name => "MY_PARAM", :type => :RFCTYPE_CHAR, :length => 20, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    assert_equal(1, function.parameter_count)
+  end
+
+  # Test setting and getting xstring
+  def test_xstring
+    function = Function.new("MY_XSTRING")
+    parameter = Parameter.new(:name => "RFC_XSTRING", :type => :RFCTYPE_XSTRING, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    fc = function.get_function_call
+    fc[:RFC_XSTRING] = "Sequence of bytes"
+    assert_equal("Sequence of bytes", fc[:RFC_XSTRING], "RFC_XSTRING")
+  end
+
+  # Test new types;
+  def test_new_float_types
+    skip "--- New types decfloat16 and decfloat34 not working yet ---"
+    # Set up new function definition with parameters of the type we want to test
+    function = Function.new("MY_FUNCTION")
+    parameter = Parameter.new(:name => "DECF16", :type => :RFCTYPE_DECF16, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    parameter = Parameter.new(:name => "DECF34", :type => :RFCTYPE_DECF34, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    fc = function.get_function_call
+    # Test DECF16
+    fc[:DECF16] = 20.723623
+    assert_equal(20.723623, fc[:DECF16], "DECF16")
+    # Test DECF34
+    fc[:DECF34] = 20.723623123
+    assert_equal(20.723623123, fc[:DECF34], "DECF34")
+  end
+
 end
 
