@@ -267,6 +267,10 @@ module NWRFCLib
   # yet used in our NWRFC library, so calling them may not work. For best results, consult sapnwrfc.h from
   # the SDK
   #############################################################################################################
+  # Callback for function server (function implementation)
+  callback :funcimpl, [:pointer, :pointer, :pointer], :int
+
+  # Function mappings
   [
     [:add_exception, :RfcAddException, [:pointer, :pointer, :pointer], :int],
     [:add_function_desc, :RfcAddFunctionDesc, [:pointer, :pointer, :pointer], :int],
@@ -343,7 +347,7 @@ module NWRFCLib
     [:insert_new_row, :RfcInsertNewRow, [:pointer, :pointer], :pointer],
     [:insert_row, :RfcInsertRow, [:pointer, :pointer, :pointer], :int],
     [:install_generic_server_function, :RfcInstallGenericServerFunction, [:pointer, :pointer, :pointer], :int],
-    [:install_server_function, :RfcInstallServerFunction, [:pointer, :pointer, :pointer, :pointer], :int],
+    [:install_server_function, :RfcInstallServerFunction, [:pointer, :pointer, :funcimpl, :pointer], :int],
     [:install_transaction_handlers, :RfcInstallTransactionHandlers, [:pointer, :pointer, :pointer, :pointer, :pointer, :pointer], :int],
     [:invoke, :RfcInvoke, [:pointer, :pointer, :pointer], :int],
     [:invoke_in_transaction, :RfcInvokeInTransaction, [:pointer, :pointer, :pointer], :int],

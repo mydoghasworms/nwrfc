@@ -7,6 +7,7 @@
 
 require File.dirname(__FILE__)+'/nwrfc/nwrfclib'
 require File.dirname(__FILE__)+'/nwrfc/datacontainer'
+require File.dirname(__FILE__)+'/nwrfc/server'
 
 require 'date'
 require 'time'
@@ -38,6 +39,21 @@ module NWRFC
     [version.read_string_dn.uC, major.read_uint, minor.read_uint, patch.read_uint]
   end
 
+  # Take Hash of connection parameters and returns FFI pointer to an array
+  # for passing to connection
+  def NWRFC.make_conn_params(params) #https://github.com/ffi/ffi/wiki/Structs
+    par = FFI::MemoryPointer.new(NWRFCLib::RFCConnParam, params.length)
+    pars = params.length.times.collect do |i|
+      NWRFCLib::RFCConnParam.new(par + i * NWRFCLib::RFCConnParam.size)
+    end
+    tpar = params.to_a
+    params.length.times do |n|
+      pars[n][:name] = FFI::MemoryPointer.from_string(tpar[n][0].to_s.cU)
+      pars[n][:value] = FFI::MemoryPointer.from_string(tpar[n][1].to_s.cU)
+    end
+    par
+  end
+
   def NWRFC.check_error(error_handle)
     raise "Error code #{error_handle[:code]} group #{error_handle[:group]} message #{error_handle[:message].get_str}" \
       if error_handle[:code] > 0
@@ -54,11 +70,9 @@ module NWRFC
     def initialize(conn_params)
       conn_params.untaint #For params loaded from file, e.g.
       raise "Connection parameters must be a Hash" unless conn_params.instance_of? Hash
-      #NWRFCLib.init
-      @cparams = NWRFCLib.make_conn_params(conn_params)
+      @cparams = NWRFC.make_conn_params(conn_params)
       raise "Could not create valid pointer from parameters" unless @cparams.instance_of? FFI::MemoryPointer
-      #@errp = FFI::MemoryPointer.new(NWRFCLib::RFCError)
-      @error =  NWRFCLib::RFCError.new #@errp
+      @error =  NWRFCLib::RFCError.new
       @handle = NWRFCLib.open_connection(@cparams, conn_params.length, @error.to_ptr)
       NWRFC.check_error(@error)
       self
@@ -133,8 +147,10 @@ module NWRFC
   # or by calling Connection#get_function. This only represents the description of the function;
   # to call a function, an instance of a function call must be obtained with #get_function_call
   class Function
-    attr_reader :desc, :connection, :function_name
+    attr_reader :desc, :function_name
+    attr_accessor :connection
 
+    # TODO: Update doc to reflect different calling options
     # Get a function module instance; can also be obtained by calling Connection#get_function
     # Takes either: (connection, function_name) or (function_name)
     # When passed only `function_name`, creates a new function description locally, instead of
@@ -175,15 +191,25 @@ module NWRFC
 
   end
 
+  # Represents a callable instance of a function
   class FunctionCall < DataContainer
     attr_reader :handle, :desc, :connection, :function
 
+    # TODO: Update doc to reflect different calling options
+    # Call with either Function or Connection and Function Call instance (handle)
     def initialize(function)
+      raise("Must initialize function with 1 or 2 arguments") if args.size != 1 && args.size != 2
       @error = NWRFCLib::RFCError.new
-      @function = function
-      @connection = function.connection
-      @handle = NWRFCLib.create_function(@function.desc, @error.to_ptr)
-      @desc = function.desc
+      if args.size == 2
+        @handle = args[1]
+        @connection = args[0].connection
+        # TODO: Get function description from instance
+      else
+        @function = args[0] #function
+        @connection = args[0].connection
+        @handle = NWRFCLib.create_function(@function.desc, @error.to_ptr)
+        @desc = args[0].desc
+      end
       NWRFC.check_error(@error)
     end
 

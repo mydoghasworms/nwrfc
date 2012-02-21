@@ -13,3 +13,11 @@ system2:
   user: DEVELOPER
   passwd: ch4ngeme
   trace: 0
+
+system3:
+  ashost: jdgscrmdev00.jdg.co.za
+  client: "710"
+  sysnr: "00"
+  user: MARTINC
+  passwd: Hopeful1
+  trace: 0

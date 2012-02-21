@@ -9,7 +9,7 @@ require 'yaml'
 
 include NWRFC
 
-$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
+$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system3"]
 
 class TestNWRFC < Test::Unit::TestCase
   def test_steps
@@ -150,6 +150,21 @@ class TestNWRFC < Test::Unit::TestCase
     # Test DECF34
     fc[:DECF34] = 20.723623123
     assert_equal(20.723623123, fc[:DECF34], "DECF34")
+  end
+
+  def test_server
+    require 'ruby-debug'
+    # Function to call
+    function = Function.new("MY_STRING")
+    parameter = Parameter.new(:name => "RFC_STRING", :type => :RFCTYPE_STRING, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    # Set up server
+    server = Server.new({:gwhost => $login_params["ashost"], :program_id => "RUBYNWRFC"})
+    # Run server
+    server.serve(function) {|connection, func|
+      debugger
+      puts func
+    }
   end
 
 end
