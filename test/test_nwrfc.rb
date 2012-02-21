@@ -9,7 +9,7 @@ require 'yaml'
 
 include NWRFC
 
-$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system3"]
+$login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
 
 class TestNWRFC < Test::Unit::TestCase
   def test_steps
@@ -153,6 +153,7 @@ class TestNWRFC < Test::Unit::TestCase
   end
 
   def test_server
+    skip "Skip for now"
     require 'ruby-debug'
     # Function to call
     function = Function.new("MY_STRING")
@@ -165,6 +166,22 @@ class TestNWRFC < Test::Unit::TestCase
       debugger
       puts func
     }
+  end
+
+  # This test relies on the fact that you do not have a user 'Z_A_Z_AZ'
+  # with password 'A@#1&ZA!' on the system you are testing with!
+  def test_login_error
+    begin
+      lparams = $login_params.dup
+      lparams["user"] = 'Z_A_Z_AZ'
+      lparams["passwd"] = 'A@#1&ZA!'
+      Connection.new(lparams)
+      raise "Test failed. Do you have a user Z_A_Z_AZ with password A@#1&ZA!?"
+    rescue NWError
+      assert_equal(:RFC_LOGON_FAILURE, $!.code, "Error code")
+      assert_equal(:LOGON_FAILURE, $!.group, "Error group")
+      puts $!.inspect # Test the inspect method
+    end
   end
 
 end

@@ -8,6 +8,7 @@
 require File.dirname(__FILE__)+'/nwrfc/nwrfclib'
 require File.dirname(__FILE__)+'/nwrfc/datacontainer'
 require File.dirname(__FILE__)+'/nwrfc/server'
+require File.dirname(__FILE__)+'/nwrfc/nwerror'
 
 require 'date'
 require 'time'
@@ -55,8 +56,10 @@ module NWRFC
   end
 
   def NWRFC.check_error(error_handle)
-    raise "Error code #{error_handle[:code]} group #{error_handle[:group]} message #{error_handle[:message].get_str}" \
+    raise NWError, error_handle \
       if error_handle[:code] > 0
+    #raise "Error code #{error_handle[:code]} group #{error_handle[:group]} message #{error_handle[:message].get_str}" \
+      
   end
 
   # Represents a connection to a SAP system that can be used to invoke
@@ -197,7 +200,7 @@ module NWRFC
 
     # TODO: Update doc to reflect different calling options
     # Call with either Function or Connection and Function Call instance (handle)
-    def initialize(function)
+    def initialize(*args)
       raise("Must initialize function with 1 or 2 arguments") if args.size != 1 && args.size != 2
       @error = NWRFCLib::RFCError.new
       if args.size == 2
@@ -224,7 +227,8 @@ module NWRFC
 
     include Enumerable
 
-    def each(&block)
+    # Iterate over the rows in a table. Each row is yielded as a structure
+    def each(&block) #:yields row
       rc = NWRFCLib.move_to_first_row(@handle, @error)
       NWRFC.check_error(@error) if rc > 0
       size.times do |row|
@@ -236,6 +240,7 @@ module NWRFC
       end
     end
 
+    # Return the number of rows in the table
     def size
       rows = FFI::MemoryPointer.new(:uint)
       rc = NWRFCLib.get_row_count(@handle, rows, @error)
@@ -267,7 +272,7 @@ module NWRFC
     # Return a list (array) of symbols representing the names of the fields
     # of this structure
     #---
-    # TODO: This is not working!
+    # FIXME: This is not working!
     def fields
       fc = FFI::MemoryPointer.new(:uint)
       rc = NWRFCLib.get_field_count(@handle, fc, @error)
