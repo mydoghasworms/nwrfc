@@ -199,6 +199,26 @@ module NWRFC
       pcount.read_uint
     end
 
+    # Return the description of parameters associated with this Function
+    def parameters
+      parameter_count.times.inject({}) do |params, index|
+        param = NWRFCLib::RFCFuncParam.new
+        NWRFCLib.get_parameter_desc_by_index(@desc, index, param.to_ptr, @error.to_ptr)
+        params[param[:name].get_str] = {
+          :type => NWRFCLib::RFC_TYPE[param[:type]],
+          :direction => NWRFCLib::RFC_DIRECTION[param[:direction]],
+          :nucLength => param[:nucLength],
+          :ucLength => param[:ucLength],
+          :decimals => param[:decimals],
+          :typeDescHandle => param[:typeDescHandle],
+          :defaultValue => param[:defaultValue].get_str,
+          :parameterText => param[:parameterText].get_str,
+          :optional => param[:optional]
+        }
+        params
+      end
+    end
+
   end
 
   # Represents a callable instance of a function
@@ -267,6 +287,20 @@ module NWRFC
       struct_handle = NWRFCLib.get_current_row(@handle, @error)
       NWRFC.check_error(@error)
       Structure.new(struct_handle)
+    end
+
+    # Append a row (structure) to the table
+    def append(row)
+      raise "Must append a structure" unless row.class == NWRFC::Structure
+      rc = NWRFCLib.append_row(@handle, row.handle, @error)
+      NWRFC.check_error(@error) if rc > 0
+    end
+
+    # Add new (empty) row and return the structure handle
+    def new_row
+      s_handle = NWRFCLib.append_new_row(@handle, @error)
+      NWRFC.check_error(@error)
+      Structure.new(s_handle)
     end
 
   end #class Table

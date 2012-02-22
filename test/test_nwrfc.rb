@@ -140,7 +140,6 @@ class TestNWRFC < Test::Unit::TestCase
 
   # Test setting and getting byte and bcd types
   def test_byte_and_bcd_types
-    require 'ruby-debug'
     function = Function.new("MY_FUNC")
     parameter = Parameter.new(:name => "RFCTYPE_BCD1", :length => 10, :type => :RFCTYPE_BCD, :direction=> :RFC_IMPORT)
     function.add_parameter(parameter)
@@ -215,19 +214,37 @@ class TestNWRFC < Test::Unit::TestCase
     exp[:STRING]
     exp[:BYTE]
     exp[:XSTRING]
-    debugger
     exp[:NUMC]
     exp[:DEC]
     exp[:FLTP]
     exp[:INT]
     exp[:CURR]
-    #exp[:CUKY]
-    #exp[:QUAN]
-    #exp[:UNIT]
-    #exp[:DATE]
-    #exp[:TIME]
-    #exp[:LANG]
+    exp[:CUKY]
+    exp[:QUAN]
+    exp[:UNIT]
+    exp[:DATE]
+    exp[:TIME]
+    exp[:LANG]
   end
+
+  def test_table_operations
+    require 'ruby-debug'
+    connection = Connection.new($login_params)
+    function = connection.get_function("STFC_DEEP_TABLE")
+    fc = function.get_function_call
+    it = fc[:IMPORT_TAB]
+
+    row = it.new_row
+    assert_equal(1, it.size, "Wrong number of rows")
+    it[:C] = 'a'
+    it[:I] = 12345
+    it[:STR] = 'Howdy Folks'
+    it[:XSTR] = "\x0A\x0D\x99\xFF"
+    it.append(row)
+    it.append(row)
+    fc.invoke
+    assert_equal(3, fc[:IMPORT_TAB].size, "Wrong number of rows")
+ end
 
 end
 
