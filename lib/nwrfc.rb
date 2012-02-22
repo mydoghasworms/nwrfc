@@ -125,8 +125,15 @@ module NWRFC
     attr_accessor :handle
 
     # Create a parameter by setting parameter attributes
-    def initialize(*args)
+    def initialize(*args)  
+
       attr = args[0]
+      
+      #TODO: For certain types, e.g. :RFCTYPE_BCD, a length specification is 
+      # required, otherwise a segfault is the result later down the line.
+      # Find and implement all the types where this is required
+      raise "RFCTYPE_BCD requires a length" if attr[:type] == :RFCTYPE_BCD && !(attr[:length])
+
       @handle                 = NWRFCLib::RFCFuncParam.new
       @handle[:name]          = attr[:name].cU if attr[:name]
       @handle[:direction]     = NWRFCLib::RFC_DIRECTION[attr[:direction]] if attr[:direction]

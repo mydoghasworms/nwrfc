@@ -7,6 +7,8 @@ require 'rubygems'
 require File.dirname(__FILE__)+'/../lib/nwrfc'
 require 'yaml'
 
+require 'ruby-debug'
+
 include NWRFC
 
 $login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
@@ -132,9 +134,26 @@ class TestNWRFC < Test::Unit::TestCase
     fc = function.get_function_call
     fc[:RFC_XSTRING] = "Sequence of bytes"
     assert_equal("Sequence of bytes", fc[:RFC_XSTRING], "RFC_XSTRING")
+    fc[:RFC_XSTRING] = "\x01\xA1\xB2\xDC\xCD\xE1\xE0\xFF"
+    assert_equal("\x01\xA1\xB2\xDC\xCD\xE1\xE0\xFF", fc[:RFC_XSTRING], "RFC_XSTRING")
   end
 
-  # Test new types;
+  # Test setting and getting byte and bcd types
+  def test_byte_and_bcd_types
+    require 'ruby-debug'
+    function = Function.new("MY_FUNC")
+    parameter = Parameter.new(:name => "RFCTYPE_BCD1", :length => 10, :type => :RFCTYPE_BCD, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    parameter = Parameter.new(:name => "RFCTYPE_BCD2", :length => 10, :decimals => 3, :type => :RFCTYPE_BCD, :direction=> :RFC_IMPORT)
+    function.add_parameter(parameter)
+    fc = function.get_function_call
+    fc[:RFCTYPE_BCD1] = 12392
+    assert_equal(12392, fc[:RFCTYPE_BCD1], "RFCTYPE_BCD1 (no decimals)")
+    fc[:RFCTYPE_BCD2] = 12392.341
+    assert_equal(12392.341, fc[:RFCTYPE_BCD2], "RFCTYPE_BCD2 (3 decimals)")
+  end
+
+  # Test new float types;
   def test_new_float_types
     skip "--- New types decfloat16 and decfloat34 not working yet ---"
     # Set up new function definition with parameters of the type we want to test
@@ -154,7 +173,6 @@ class TestNWRFC < Test::Unit::TestCase
 
   def test_server
     skip "Skip for now"
-    require 'ruby-debug'
     # Function to call
     function = Function.new("MY_STRING")
     parameter = Parameter.new(:name => "RFC_STRING", :type => :RFCTYPE_STRING, :direction=> :RFC_IMPORT)
@@ -163,7 +181,6 @@ class TestNWRFC < Test::Unit::TestCase
     server = Server.new({:gwhost => $login_params["ashost"], :program_id => "RUBYNWRFC"})
     # Run server
     server.serve(function) {|connection, func|
-      debugger
       puts func
     }
   end
@@ -180,8 +197,36 @@ class TestNWRFC < Test::Unit::TestCase
     rescue NWError
       assert_equal(:RFC_LOGON_FAILURE, $!.code, "Error code")
       assert_equal(:LOGON_FAILURE, $!.group, "Error group")
-      puts $!.inspect # Test the inspect method
+      $!.inspect # Test the inspect method
     end
+  end
+
+  # This test calls a custom function, so it will be skipped
+  # The function YTYPES_TEST sets a return parameter EXP of type SFPDATATYPES
+  # with various values
+  def test_all_types
+    skip "Custom function call; for development only"
+    connection = Connection.new($login_params)
+    function = connection.get_function("YTYPES_TEST")
+    fc = function.get_function_call
+    fc.invoke
+    exp = fc[:exp]
+    exp[:CHAR]
+    exp[:STRING]
+    exp[:BYTE]
+    exp[:XSTRING]
+    debugger
+    exp[:NUMC]
+    exp[:DEC]
+    exp[:FLTP]
+    exp[:INT]
+    exp[:CURR]
+    #exp[:CUKY]
+    #exp[:QUAN]
+    #exp[:UNIT]
+    #exp[:DATE]
+    #exp[:TIME]
+    #exp[:LANG]
   end
 
 end

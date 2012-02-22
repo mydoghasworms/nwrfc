@@ -143,12 +143,16 @@ module NWRFCLib
     :RFCTYPE_INT2   , 9,
     :RFCTYPE_INT1   , 10,
     :RFCTYPE_NULL  , 14,
+    :RFCTYPE_ABAPOBJECT, 16,
     :RFCTYPE_STRUCTURE , 17,
     :RFCTYPE_DECF16  , 23,
     :RFCTYPE_DECF34  , 24,
     :RFCTYPE_XMLDATA , 28,
     :RFCTYPE_STRING , 29,
-    :RFCTYPE_XSTRING , 30
+    :RFCTYPE_XSTRING , 30,
+    :RFCTYPE_BOX, 31,
+    :RFCTYPE_GENERIC_BOX, 32,
+    :_RFCTYPE_max_value
   )
 
   # Connection parameter wrapper (struct RFC_CONNECTION_PARAMETER in sapnwrfc.h)
