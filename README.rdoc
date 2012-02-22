@@ -77,6 +77,17 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== What's new in 0.0.2
+
+* More comprehensive type support
+* More table operations
+
+=== What's new in 0.0.1
+
+* Fix loading sapnw library
+* Fix UTF-8 conversion for Windows
+* Enhanced type support
+
 === What's new in 0.0.0
 
 * Able to call functions
@@ -85,6 +96,6 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Contributing
 
-Improvements to the source code are welcome. Email me at martin dot ceronio at infosize dot co dot za.
-
-Also let me know, please on which platforms you have tested the gem.
+* Improvements to the source code are welcome
+* Indicate on which platforms you have tested the gem
+* Suggestions for improving the API / Hints for idiomatic Ruby

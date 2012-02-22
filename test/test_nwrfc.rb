@@ -228,7 +228,6 @@ class TestNWRFC < Test::Unit::TestCase
   end
 
   def test_table_operations
-    require 'ruby-debug'
     connection = Connection.new($login_params)
     function = connection.get_function("STFC_DEEP_TABLE")
     fc = function.get_function_call
@@ -244,7 +243,15 @@ class TestNWRFC < Test::Unit::TestCase
     it.append(row)
     fc.invoke
     assert_equal(3, fc[:IMPORT_TAB].size, "Wrong number of rows")
- end
+    connection.close
+  end
+
+  def test_walkthru
+    connection = Connection.new($login_params)
+    function = connection.get_function("RFC_WALK_THRU_TEST")
+
+    connection.close
+  end
 
 end
 
