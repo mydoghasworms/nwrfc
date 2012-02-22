@@ -16,20 +16,19 @@ require 'time'
 # This library provides a way to call the functions of the SAP Netweaver RFC
 # SDK, i.e. opening a connection to an ABAP system, calling functions etc., as
 # well as running an RFC service
-#---
-# *TODO*: Create an error class that wraps the SAP error struct, so it can
-# be raised and the caller can get all the information from there
-#+++
 
 module NWRFC
 
+  # ABAP Time Format ("HHMMSS")
   NW_TIME_FORMAT = "%H%M%S"
+  # ABAP Date Format ("YYYYMMDD")
   NW_DATE_FORMAT = "%Y%m%d"
 
   def inspect
     self.to_s
   end
 
+  # Return the version of the NW RFC SDK library
   def NWRFC.get_version
     # See custom method FFI::Pointer#read_string_dn in nwrfclib.rb
     # http://stackoverflow.com/questions/9293307/ruby-ffi-ruby-1-8-reading-utf-16le-encoded-strings
@@ -41,7 +40,7 @@ module NWRFC
   end
 
   # Take Hash of connection parameters and returns FFI pointer to an array
-  # for passing to connection
+  # for setting up a connection
   def NWRFC.make_conn_params(params) #https://github.com/ffi/ffi/wiki/Structs
     par = FFI::MemoryPointer.new(NWRFCLib::RFCConnParam, params.length)
     pars = params.length.times.collect do |i|
@@ -55,6 +54,7 @@ module NWRFC
     par
   end
 
+  # Check for an error using error handle (used internally)
   def NWRFC.check_error(error_handle)
     raise NWError, error_handle \
       if error_handle[:code] > 0
@@ -62,7 +62,7 @@ module NWRFC
       
   end
 
-  # Represents a connection to a SAP system that can be used to invoke
+  # Represents a client connection to a SAP system that can be used to invoke
   # remote-enabled functions
   class Connection
     attr_reader :handle
@@ -82,18 +82,22 @@ module NWRFC
     end
 
     # Call the NW RFC SDK's RfcCloseConnection() function with the current
-    # connection; this (should - *TODO* - check) invalidate the connection handle
+    # connection; this *should* invalidate the connection handle
     # and cause an error on any subsequent use of this connection
+    #@todo Write test to check that handle is invalidated and causes subsequent calls to fail
     def disconnect
       NWRFCLib.close_connection(@handle, @error.to_ptr)
       NWRFC.check_error(@error)
     end
-    
+
+    # Get the description of a given function module from the system to which we are connected
+    # @return [Function] function module description
     def get_function(function_name)
       Function.new(self, function_name)
     end
 
     # Return details about the current connection and the system
+    # @return [Hash] information about the current connection
     def connection_info
       return @get_connection_attributes if @get_connection_attributes
       conn_info = NWRFCLib::RFCConnection.new
@@ -107,31 +111,37 @@ module NWRFC
 
   end
 
+  # Converts ABAP true/false into Ruby true/false
+  # @return True for 'X', False for ' ' or nil otherwise
   def NWRFC.abap_bool(value)
     return true if value == 'X'
     return false if value == ' '
     nil
   end
 
+  # Converts Ruby true/false into ABAP true/false
+  # @return 'X' for true,, ' ' for false or nil otherwise
   def NWRFC.bool_abap(value)
     return 'X' if value == true
     return ' ' if value == false
     nil
   end
 
-  # Represents a function parameter
+  # Represents the metadata of a function parameter
   class Parameter
 
     attr_accessor :handle
 
     # Create a parameter by setting parameter attributes
+    #@todo For certain types, e.g. :RFCTYPE_BCD, a length specification is
+    #  required, otherwise a segfault is the result later down the line.
+    #  Find and implement all the types where this is required
     def initialize(*args)  
 
       attr = args[0]
       
-      #TODO: For certain types, e.g. :RFCTYPE_BCD, a length specification is 
-      # required, otherwise a segfault is the result later down the line.
-      # Find and implement all the types where this is required
+
+
       raise "RFCTYPE_BCD requires a length" if attr[:type] == :RFCTYPE_BCD && !(attr[:length])
 
       @handle                 = NWRFCLib::RFCFuncParam.new

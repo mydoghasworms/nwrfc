@@ -1,7 +1,6 @@
 module NWRFC
 
   # Implementation of a server to host RFC functions to be called from an ABAP system
-  # or from another RFC implementation
   class Server
 
     TIMEOUT = 200

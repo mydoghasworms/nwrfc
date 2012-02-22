@@ -4,3 +4,4 @@ pkg/
 *.trc
 nbproject/
 doc/
+.yardoc/

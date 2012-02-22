@@ -1,6 +1,8 @@
 module NWRFC
 
   # Representation of a data container (function, structure or table)
+  # Implements common functions for data containers, such as setting and getting values, tables, structures and
+  # takes care of type conversion and calling correct SDK functions to set or get values
   class DataContainer
     attr_reader :handle, :desc
 
