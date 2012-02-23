@@ -107,7 +107,9 @@ module NWRFC
         hash[member] = conn_info[member].get_str #get_str, own definition in nwrfclib.rb, FFI::StructLayout::CharArray#get_str
         hash
       }
-    end  
+    end
+
+    alias :close :disconnect
 
   end
 
@@ -170,11 +172,19 @@ module NWRFC
     attr_reader :desc, :function_name
     attr_accessor :connection
 
-    # TODO: Update doc to reflect different calling options
     # Get a function module instance; can also be obtained by calling Connection#get_function
     # Takes either: (connection, function_name) or (function_name)
     # When passed only `function_name`, creates a new function description locally, instead of
     # fetching it form the server pointed to by connection
+    #@overload new(connection, function_name)
+    #   Fetches a function definition from the server pointed to by the connection
+    #   @param [Connection] connection Connection to SAP ABAP system
+    #   @param [String] function_name Name of the function module on the connected system
+    #
+    #@overload new(function_name)
+    #   Returns a new function descriptor. This is ideally used in the case of establishing a
+    #   server function. In this case, the function cannot be used to make a remote function call.
+    #   @param [String] function_name Name of the new function module
     def initialize(*args)#(connection, function_name)
       raise("Must initialize function with 1 or 2 arguments") if args.size != 1 && args.size != 2
       @error =  NWRFCLib::RFCError.new
@@ -191,6 +201,9 @@ module NWRFC
       end
     end
 
+    # Add a parameter to a function module. Ideally to be used in the case where a function definition is built
+    # up in the client code, rather than fetching it from the server for a remote call
+    # @param [Parameter] Definition of a function module parameter
     def add_parameter(parameter)
       rc = NWRFCLib.add_parameter(@desc, parameter.handle, @error)
       NWRFC.check_error(@error) if rc > 0
@@ -235,16 +248,28 @@ module NWRFC
   class FunctionCall < DataContainer
     attr_reader :handle, :desc, :connection, :function
 
-    # TODO: Update doc to reflect different calling options
     # Call with either Function or Connection and Function Call instance (handle)
+    #@overload new(function)
+    #   Get a function call instance from the function description
+    #   @param [Function] function Function Description
+    #@overload new(function_handle)
+    #   Used in the case of server functions; instantiate a function call instance from the connection
+    #   and function description handles received when function is invoked on our side from a remote
+    #   system; in this case, there is no handle to the connection, and we take advantage only of the
+    #   data container capabilities
+    #   @param [FFI::Pointer] function_handle Pointer to the function handle (RFC_FUNCTION_HANDLE)
     def initialize(*args)
-      raise("Must initialize function with 1 or 2 arguments") if args.size != 1 && args.size != 2
       @error = NWRFCLib::RFCError.new
-      if args.size == 2
-        @handle = args[1]
-        @connection = args[0].connection
-        # TODO: Get function description from instance
-      else
+      if args[0].class == FFI::Pointer
+        @handle = args[0]
+        @connection = nil
+        @function = nil
+        # @connection = args[0].connection
+        @desc = NWRFCLib.describe_function(@handle, @error)
+        #@todo Investigate having a referenced Function object as well in the server case; does it have practical applications?
+        #  Doing this would require an extra way of handling the constructor of Function
+        # @function = Function.new
+      elsif args[0].class == Function
         @function = args[0] #function
         @connection = args[0].connection
         @handle = NWRFCLib.create_function(@function.desc, @error.to_ptr)
@@ -253,8 +278,12 @@ module NWRFC
       NWRFC.check_error(@error)
     end
 
+    # Execute the function on the connected ABAP system
+    #@raise NWRFC::NWError
     def invoke
+      raise "Not a callable function" unless @connection
       rc = NWRFCLib.invoke(@connection.handle, @handle, @error.to_ptr)
+      #@todo Handle function exceptions by checking for :RFC_ABAP_EXCEPTION (5)
       NWRFC.check_error(@error) if rc > 0
     end
   end
@@ -307,10 +336,17 @@ module NWRFC
     end
 
     # Add new (empty) row and return the structure handle
+    # or yield it to a passed block
+    # @return Structure
     def new_row
       s_handle = NWRFCLib.append_new_row(@handle, @error)
       NWRFC.check_error(@error)
-      Structure.new(s_handle)
+      s = Structure.new(s_handle)
+      if block_given?
+        yield s
+      else
+        s
+      end
     end
 
   end #class Table

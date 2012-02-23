@@ -51,10 +51,13 @@ end
 # architectures, though the plan is not to support them)
 #String.class_eval{define_method(:cU){ Iconv.conv("UTF-16LE", "UTF8", self+"\0") }}
 class String
+
+  # Convert string from UTF-8 to doudble-null terminated UTF-16LE string
   def cU
     NWRFCLib::Cutf8_to_utf16le.iconv(self+"\0")
   end
 
+  # Convert string from UTF-16LE to UTF-8 and trim trailing whitespace
   def uC
     NWRFCLib::Cutf16le_to_utf8.iconv(self).strip
   end
@@ -80,7 +83,7 @@ module NWRFCLib
   ffi_lib 'sapnwrfc'
 
   # Multiplier for providing correct byte size for String passed to RFC library
-  #TODO: Make platform-dependent size based on RUBY_PLATFORM
+  #@todo Make platform-dependent size based on RUBY_PLATFORM
   B_SIZE = 2
 
   RFC_RC = enum(
@@ -281,7 +284,13 @@ module NWRFCLib
     [:add_parameter, :RfcAddParameter, [:pointer, :pointer, :pointer], :int],
     [:add_type_desc, :RfcAddTypeDesc, [:pointer, :pointer, :pointer], :int],
     [:add_type_field, :RfcAddTypeField, [:pointer, :pointer, :pointer], :int],
+  # @method append_new_row(table_handle, error_handle)
+  # @returns FFI::Pointer pointer to structure of new row
+  # calls RfcAppendNewRow()
     [:append_new_row, :RfcAppendNewRow, [:pointer, :pointer], :pointer],
+  # @method append_row(table_handle, structure, error_handle)
+  # @returns Integer RC
+  # calls RfcAppendRow()
     [:append_row, :RfcAppendRow, [:pointer, :pointer, :pointer], :int],
     [:clone_structure, :RfcCloneStructure, [:pointer, :pointer], :pointer],
     [:clone_table, :RfcCloneTable, [:pointer, :pointer], :pointer],

@@ -7,8 +7,6 @@ require 'rubygems'
 require File.dirname(__FILE__)+'/../lib/nwrfc'
 require 'yaml'
 
-require 'ruby-debug'
-
 include NWRFC
 
 $login_params = YAML.load_file(File.dirname(__FILE__) + "/login_params.yaml")["system1"]
@@ -178,8 +176,9 @@ class TestNWRFC < Test::Unit::TestCase
     function.add_parameter(parameter)
     # Set up server
     server = Server.new({:gwhost => $login_params["ashost"], :program_id => "RUBYNWRFC"})
+    trap("SIGINT") { server.disconnect }
     # Run server
-    server.serve(function) {|connection, func|
+    server.serve(function) {|func|
       puts func
     }
   end
@@ -247,9 +246,26 @@ class TestNWRFC < Test::Unit::TestCase
   end
 
   def test_walkthru
+    skip "Skip for now"
+    # Get the definition of the function
     connection = Connection.new($login_params)
     function = connection.get_function("RFC_WALK_THRU_TEST")
+    connection.close
 
+    # Set up server
+    server = Server.new({:gwhost => $login_params["ashost"], :program_id => "RUBYNWRFC"})
+    # Run server
+    server.serve(function) {|connection, func|
+      puts func
+    }
+  end
+
+  def test_function_exception
+    skip "Requires some work"
+    connection = Connection.new($login_params)
+    function = connection.get_function("STFC_EXCEPTION")
+    fc = function.get_function_call
+    fc.invoke
     connection.close
   end
 

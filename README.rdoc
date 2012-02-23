@@ -51,6 +51,13 @@ Setting and getting parameters and fields:
 
 == Installation
 
+In order to install and run nwrfc, you need to install {http://github.com/ffi/ffi Ruby-FFI} which requires compilation.
+On Windows, you should be running the one-click {http://rubyinstaller.org/downloads/ Ruby Installer} and install the
+{http://github.com/oneclick/rubyinstaller/wiki/Development-Kit DevKit} which is really the easiest way to compile
+it on Windows.
+
+Then install the nwrfc gem:
+
 On Linux:
 
     sudo gem install nwrfc
@@ -76,6 +83,10 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
   rake test
 
 == Release Notes
+
+=== What's new in 0.0.3
+
+* Basic RFC server functionality
 
 === What's new in 0.0.2
 
