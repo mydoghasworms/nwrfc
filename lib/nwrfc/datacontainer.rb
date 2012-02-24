@@ -253,6 +253,25 @@ module NWRFC
       value
     end
 
+    # Return a list (array) of symbols representing the names of the fields (or parameters, in the case of a function)
+    # of this data container
+    def fields
+      fc = FFI::MemoryPointer.new(:uint)
+      rc = NWRFCLib.get_field_count(@desc, fc, @error)
+      NWRFC.check_error(@error) if rc > 0
+      fc = fc.read_uint
+      fd = NWRFCLib::RFCFieldDesc.new
+      # Make a list of field names
+      fc.times.inject([]) {|array, index|
+        rc = NWRFCLib.get_field_desc_by_index(@desc, index, fd.to_ptr, @error.to_ptr)
+        NWRFC.check_error(@error) if rc > 0
+        #@todo WARNING! our get_str method did not handle getting the name of the RESPTEXT parameter in STFC_DEEP_TABLE correctly
+        # As a workaround, we use our read_string_dn method; do we need to use this elsewhere?
+        #array << fd[:name].get_str.to_sym #<-The code with good intentions
+        array << fd[:name].to_ptr.read_string_dn.uC.to_sym #<- Workaround; the way of the future?
+      }
+    end
+
     # Get the metadata of a member (function, structure or table)
     def member_metadata(member_name)
       # TODO: Cache metadata definitions; will it be quicker than making a hash of metadata for a given member each time?
@@ -269,6 +288,8 @@ module NWRFC
         member_to_hash(fd)
       end
     end
+
+
 
     private
     # Returns the subset of metadata values common to both a function parameter

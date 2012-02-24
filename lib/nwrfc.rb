@@ -356,24 +356,7 @@ module NWRFC
   # access of a structure or a function
   class Structure < DataContainer
 
-    # Return a list (array) of symbols representing the names of the fields
-    # of this structure
-    #---
-    # FIXME: This is not working!
-    def fields
-      fc = FFI::MemoryPointer.new(:uint)
-      rc = NWRFCLib.get_field_count(@handle, fc, @error)
-      NWRFC.check_error(@error) if rc > 0
-      fc = fc.read_uint
-      fd = NWRFCLib::RFCFieldDesc.new
-      fields = []
-      debugger
-      fc.times do |index|
-        rc = NWRFCLib.get_field_desc_by_index(@handle, index, fd.to_ptr, @error.to_ptr)
-        NWRFC.check_error(@error) if rc > 0
-        fields << fd[:name].get_str.to_sym
-      end
-    end
+
     
   end # class Structure
 
