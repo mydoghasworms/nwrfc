@@ -279,5 +279,33 @@ class TestNWRFC < Test::Unit::TestCase
     connection.close
   end
 
+  def test_parameter_active
+    connection = Connection.new($login_params)
+    function = connection.get_function("STFC_DEEP_TABLE")
+    fc = function.get_function_call
+    assert_equal(true, fc.active?(:IMPORT_TAB), "parameter IMPORT_TAB should be active")
+    fc.set_active(:IMPORT_TAB)
+    assert_equal(true, fc.active?(:IMPORT_TAB), "parameter IMPORT_TAB should be active")
+    fc.set_active(:IMPORT_TAB, false)
+    assert_equal(false, fc.active?(:IMPORT_TAB), "parameter IMPORT_TAB should be inactive")
+    fc.deactivate(:IMPORT_TAB)
+    assert_equal(false, fc.active?(:IMPORT_TAB), "parameter IMPORT_TAB should be inactive")
+    connection.close
+  end
+
+  def test_parameter_active2
+    connection = Connection.new($login_params)
+    function = connection.get_function("BAPI_USER_GET_DETAIL")
+    fc = function.get_function_call
+    assert_equal(true, fc.active?(:ISLOCKED), "parameter ISLOCKED should be active")
+    fc[:USERNAME] = $login_params["user"]
+    fc.invoke
+    assert_equal("U", fc[:ISLOCKED][:WRNG_LOGON], "WRNG_LOGON should be 'U'")
+    fc = function.get_function_call
+    fc.deactivate(:ISLOCKED)
+    assert_equal("", fc[:ISLOCKED][:WRNG_LOGON], "WRNG_LOGON should be ''")
+    connection.close
+  end
+
 end
 

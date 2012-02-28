@@ -286,6 +286,31 @@ module NWRFC
       #@todo Handle function exceptions by checking for :RFC_ABAP_EXCEPTION (5)
       NWRFC.check_error(@error) if rc > 0
     end
+
+    # Returns whether or not a given parameter is active, i.e. whether it will be sent to the server during the RFC
+    # call with  FunctionCall#invoke. This is helpful for functions that set default values on parameters or otherwise
+    # check whether parameters are passed in cases where this may have an impact on performance or otherwise
+    # @param[String, Symbol] parameter Name of the parameter
+    def active?(parameter)
+      is_active = FFI::MemoryPointer.new :int
+      rc = NWRFCLib.is_parameter_active(@handle, parameter.to_s.cU, is_active, @error)
+      NWRFC.check_error(@error) if rc > 0
+      is_active.read_int == 1
+    end
+
+    # Set a named parameter to active or inactive
+    def set_active(parameter, active=true)
+      (active ? active_flag = 1 : active_flag = 0)
+      rc = NWRFCLib.set_parameter_active(@handle, parameter.to_s.cU, active_flag, @error)
+      NWRFC.check_error(@error) if rc > 0
+      active
+    end
+
+    # Set a named parameter to inactive
+    def deactivate(parameter)
+      set_active(parameter, false)
+    end
+
   end
 
 
