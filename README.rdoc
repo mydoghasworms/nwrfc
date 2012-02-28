@@ -84,6 +84,11 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== What's new in 0.0.4
+
+* Add parameter activation/deactivation functionality
+* Fix/add metadata retrieval for DataContainer
+
 === What's new in 0.0.3
 
 * Basic RFC server functionality
