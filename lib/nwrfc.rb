@@ -325,6 +325,7 @@ module NWRFC
       size.times do |row|
         struct_handle = NWRFCLib.get_current_row(@handle, @error)
         NWRFC.check_error(@error)
+        NWRFCLib.move_to_next_row(@handle, @error)
         # CAVEAT: Other calls using the handle require "handle" field
         # of the RFC_DATA_CONTAINER struct
         yield Structure.new(struct_handle)

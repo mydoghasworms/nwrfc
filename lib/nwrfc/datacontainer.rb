@@ -3,6 +3,15 @@ module NWRFC
   # Representation of a data container (function, structure or table)
   # Implements common functions for data containers, such as setting and getting values, tables, structures and
   # takes care of type conversion and calling correct SDK functions to set or get values
+  #
+  # == Type Conversions
+  # To ensure that data is passed correctly to the NW RFC SDK functions, certain conversions are applied to values
+  # passed, depending on the type of the field. ABAP supports a number of elementary types, which are listed in the
+  #
+  # DECFLOAT16 and DECFLOAT34 types are not yet supported.
+  #
+  # === Inbound
+  # For character and string
   class DataContainer
     attr_reader :handle, :desc
 
