@@ -84,6 +84,10 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== What's new in 0.0.5
+
+* Bug fix for Table#each
+
 === What's new in 0.0.4
 
 * Add parameter activation/deactivation functionality
