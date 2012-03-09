@@ -261,11 +261,16 @@ class TestNWRFC < Test::Unit::TestCase
   end
 
   def test_function_exception
-    skip "Requires some work"
     connection = Connection.new($login_params)
     function = connection.get_function("STFC_EXCEPTION")
     fc = function.get_function_call
-    fc.invoke
+    begin
+      fc.invoke
+    rescue NWABAPException => exception
+      assert_equal("EXAMPLE", exception.exception, "Unexpected error raised")
+    rescue NWError => exception
+      raise "Failed: You should not reach this line, #{exception.class}"
+    end
     connection.close
   end
 

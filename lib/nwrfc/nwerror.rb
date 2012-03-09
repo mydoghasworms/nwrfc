@@ -10,6 +10,9 @@ module NWRFC
     # available
     def initialize(error)
       @code =    NWRFCLib::RFC_RC[error[:code]]
+      # In the event that the called function raised an exception, we must create a more specific
+      # error
+      raise(NWABAPException, error[:key].get_str)  if @code == :RFC_ABAP_EXCEPTION
       @group =   NWRFCLib::RFC_ERROR_GROUP[error[:group]]
       @message = error[:message].get_str
       @type =    error[:abapMsgType].get_str
@@ -18,6 +21,18 @@ module NWRFC
 
     def inspect
       "#{@message} (code #{@code}, group #{@group}, type #{@type}, number #{@number})"
+    end
+
+  end
+
+  class NWABAPException < NWError
+    attr_reader :exception
+    def initialize(exception)
+      @exception = exception
+    end
+
+    def inspect
+      "Function exception #{exception}"
     end
 
   end
