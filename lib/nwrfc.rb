@@ -341,7 +341,7 @@ module NWRFC
 
     # Delete all rows from (empty) the table
     def clear
-      rc = delete_all_rows(@handle, @error)
+      rc = NWRFCLib.delete_all_rows(@handle, @error)
       NWRFC.check_error(@error) if rc > 0
     end
 
