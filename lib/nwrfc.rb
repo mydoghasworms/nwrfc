@@ -320,6 +320,7 @@ module NWRFC
 
     # Iterate over the rows in a table. Each row is yielded as a structure
     def each(&block) #:yields row
+      return [] if size == 0
       rc = NWRFCLib.move_to_first_row(@handle, @error)
       NWRFC.check_error(@error) if rc > 0
       size.times do |row|

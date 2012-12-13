@@ -244,6 +244,16 @@ class TestNWRFC < Test::Unit::TestCase
     assert_equal(3, fc[:IMPORT_TAB].size, "Wrong number of rows")
     connection.close
   end
+  
+  # Test fix to Table#each for empty table
+  def test_empty_table
+    connection = Connection.new($login_params)
+    function = connection.get_function("STFC_DEEP_TABLE")
+    fc = function.get_function_call
+    it = fc[:IMPORT_TAB]
+    it.each {}
+    connection.close
+  end
 
   def test_walkthru
     skip "Skip for now"
