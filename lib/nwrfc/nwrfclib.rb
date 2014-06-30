@@ -409,7 +409,7 @@ module NWRFCLib
     [:submit_transaction, :RfcSubmitTransaction, [:pointer, :pointer], :int],
     [:utf8_to_sapuc, :RfcUTF8ToSAPUC, [:pointer, :uint, :pointer, :pointer, :pointer, :pointer], :int]
   ].each{|funcsig|
-    attach_function(funcsig[0], funcsig[1], funcsig[2], funcsig[3])
+    attach_function(funcsig[0], funcsig[1], funcsig[2], funcsig[3], :blocking => true)
   }
 
   # Take Hash of connection parameters and returns FFI pointer to an array
