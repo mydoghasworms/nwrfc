@@ -43,6 +43,7 @@ module NWRFC
 
         when :RFCTYPE_BCD
           size = metadata[:nucLength] + (metadata[:decimals] || 0)
+          size += 10 # Temporary fix for issue https://github.com/mydoghasworms/nwrfc/issues/7
           buf = FFI::MemoryPointer.new(:uchar, size*2)
           rc = NWRFCLib.get_chars(@handle, metadata[:name].cU, buf, size, @error.to_ptr)
           NWRFC.check_error(@error) if rc > 0
