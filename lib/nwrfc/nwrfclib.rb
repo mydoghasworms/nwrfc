@@ -73,6 +73,17 @@ class FFI::StructLayout::CharArray
   end
 end
 
+# Enhancement for JRuby to enable the same reading of strings as above, but for JRuby we must make
+# the enhancement to FFI::StructLayout::CharArrayProxy
+# TODO Perhaps we should make the alternate change (above) the other branch of the following if statement
+if RUBY_PLATFORM == 'java'
+  class FFI::StructLayout::CharArrayProxy
+    def get_str
+      NWRFCLib::Cutf16le_to_utf8.iconv(self.to_ptr.read_string(self.size)).strip
+    end
+  end
+end
+
 # Library wrapper around NW RFC SDK shared library using RUBY-FFI
 module NWRFCLib
 
