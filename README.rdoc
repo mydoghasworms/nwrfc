@@ -84,6 +84,11 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== What's new in 0.0.7
+
+* Add support for JRuby by extending FFI::StructLayout::CharArrayProxy
+* Fix #7 (error when reading timestamp value / BCD field)
+
 === What's new in 0.0.6
 
 * Add :blocking => true in attach_function to allow other threads to continue running (thanks Meatballs1[https://github.com/Meatballs1])
