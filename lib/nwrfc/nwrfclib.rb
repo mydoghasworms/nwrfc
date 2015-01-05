@@ -7,7 +7,6 @@
 
 require 'rubygems'
 require 'ffi'
-require 'iconv'
 
 RUBY_VERSION_18 = RUBY_VERSION[0..2] == "1.8"
 
@@ -49,17 +48,17 @@ end
 # terminated UTF16 little endian encoded strings as required by the NW RFC
 # SDK function, which should work on Linux and Windows (and maybe other
 # architectures, though the plan is not to support them)
-#String.class_eval{define_method(:cU){ Iconv.conv("UTF-16LE", "UTF8", self+"\0") }}
 class String
 
-  # Convert string from UTF-8 to doudble-null terminated UTF-16LE string
+  # Convert string from UTF-8 to double-null terminated UTF-16LE string
   def cU
-    NWRFCLib::Cutf8_to_utf16le.iconv(self+"\0")
+    duplicate_string = self.dup << "\0"
+    duplicate_string.force_encoding('UTF-8').encode('UTF-16LE')
   end
 
   # Convert string from UTF-16LE to UTF-8 and trim trailing whitespace
   def uC
-    NWRFCLib::Cutf16le_to_utf8.iconv(self).strip
+    self.force_encoding('UTF-16LE').encode('UTF-8')
   end
 
 end
@@ -69,7 +68,7 @@ end
 # and strips off blanks at the end to return a readable String
 class FFI::StructLayout::CharArray
   def get_str
-    NWRFCLib::Cutf16le_to_utf8.iconv(self.to_ptr.read_string(self.size)).strip
+    self.to_ptr.read_string(self.size).uC
   end
 end
 
@@ -79,16 +78,13 @@ end
 if RUBY_PLATFORM == 'java'
   class FFI::StructLayout::CharArrayProxy
     def get_str
-      NWRFCLib::Cutf16le_to_utf8.iconv(self.to_ptr.read_string(self.size)).strip
+      self.to_ptr.read_string(self.size).uC
     end
   end
 end
 
 # Library wrapper around NW RFC SDK shared library using RUBY-FFI
 module NWRFCLib
-
-  Cutf8_to_utf16le = Iconv.new("UTF-16LE", "UTF-8")
-  Cutf16le_to_utf8 = Iconv.new("UTF-8", "UTF-16LE")
 
   extend FFI::Library
   ffi_lib 'sapnwrfc'
