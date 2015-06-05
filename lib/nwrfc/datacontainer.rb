@@ -1,3 +1,5 @@
+require 'bigdecimal'
+
 module NWRFC
 
   # Representation of a data container (function, structure or table)
@@ -47,12 +49,7 @@ module NWRFC
           buf = FFI::MemoryPointer.new(:uchar, size*2)
           rc = NWRFCLib.get_chars(@handle, metadata[:name].cU, buf, size, @error.to_ptr)
           NWRFC.check_error(@error) if rc > 0
-          return buf.get_bytes(0, size*2).uC.to_f
-        #size = metadata[:ucLength]
-        #cb = FFI::MemoryPointer.new :char, size * 2
-        #rc = NWRFCLib.get_chars(@handle, metadata[:name].cU, cb, size * 2, @error.to_ptr)
-        #NWRFC.check_error(@error) if rc > 0
-        #cb.read_string(size).uC
+          return BigDecimal(buf.get_bytes(0, size*2).uC)
 
         when :RFCTYPE_TIME
           # TODO: See whether we can optimize this
@@ -167,9 +164,13 @@ module NWRFC
           NWRFCLib.set_date(@handle, member.cU, value.cU, @error.to_ptr)
 
         when :RFCTYPE_BCD
-          stval = value.to_s.cU
-          m = FFI::MemoryPointer.from_string stval
-          NWRFCLib.set_string(@handle, member.cU, m, value.to_s.size, @error)
+          if value.class == BigDecimal
+            stval = value.to_s('F')
+          else
+            stval = value.to_s
+          end
+          m = FFI::MemoryPointer.from_string stval.cU
+          NWRFCLib.set_string(@handle, member.cU, m, stval.size, @error)
 
         when :RFCTYPE_TIME
           value = value_to_time(value)

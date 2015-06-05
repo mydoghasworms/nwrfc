@@ -31,8 +31,8 @@ module NWRFC
       @exception = exception
     end
 
-    def inspect
-      "Function exception #{exception}"
+    def to_s
+      "Function exception #{@exception}"
     end
 
   end

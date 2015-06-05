@@ -84,6 +84,11 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== Available in 0.0.8
+
+* BigDecimal support added for BCD values (BCD is also returned as BigDecimal to cater for very big numbers like timestamps)
+* Support for String::encode in Ruby 1.9 and above instead of iconv (thanks Meatballs1)
+
 === What's new in 0.0.7
 
 * Add support for JRuby by extending FFI::StructLayout::CharArrayProxy
