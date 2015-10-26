@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
   s.name        = 'nwrfc'
-  s.version     = '0.0.8'
-  s.date        = '2015-06-05'
+  s.version     = '0.0.9'
+  s.date        = '2015-10-26'
   s.summary     = "SAP Netweaver RFC Library Wrapper"
   s.description = "SAP Netweaver RFC Library Wrapper using Ruby-FFI"
   s.authors     = ["Martin Ceronio"]
-  s.email       = 'martin.ceronio@infosize.co.za'
+  s.email       = 'mydoghasworms@gmail.com'
   s.homepage    = 'http://rubygems.org/gems/nwrfc'
   s.has_rdoc    = true
   s.add_dependency('ffi', '>= 1.9.3')

@@ -111,6 +111,37 @@ module NWRFC
 
     alias :close :disconnect
 
+    def start_transaction(queue_name = nil)
+      @tid = FFI::MemoryPointer.new(:char, 50)
+      rc = NWRFCLib.get_transaction_id(@handle, @tid, @error)
+      NWRFC.check_error(@error) if rc > 0
+      queue_name = FFI::MemoryPointer.from_string(queue_name.to_s.cU) if queue_name
+      transaction_handle = NWRFCLib.create_transaction(@handle, @tid, queue_name, @error)
+      NWRFC.check_error(@error)
+      Transaction.new(transaction_handle)
+    end
+
+  end
+
+  class Transaction
+    attr_reader :handle
+
+    def initialize(handle)
+      @handle = handle
+      @error =  NWRFCLib::RFCError.new
+    end
+
+    def commit
+      rc = NWRFCLib.submit_transaction(@handle, @error)
+      NWRFC.check_error(@error) if rc > 0
+      rc = NWRFCLib.confirm_transaction(@handle, @error)
+      NWRFC.check_error(@error) if rc > 0
+      rc = NWRFCLib.destroy_transaction(@handle, @error)
+      NWRFC.check_error(@error) if rc > 0
+    end
+
+    alias :submit :commit
+
   end
 
   # Converts ABAP true/false into Ruby true/false
@@ -280,11 +311,16 @@ module NWRFC
 
     # Execute the function on the connected ABAP system
     #@raise NWRFC::NWError
-    def invoke
+    def invoke(tx = nil)
       raise "Not a callable function" unless @connection
-      rc = NWRFCLib.invoke(@connection.handle, @handle, @error.to_ptr)
-      #@todo Handle function exceptions by checking for :RFC_ABAP_EXCEPTION (5)
-      NWRFC.check_error(@error) if rc > 0
+      if tx
+        rc = NWRFCLib.invoke_in_transaction(tx.handle, @handle, @error.to_ptr)
+        NWRFC.check_error(@error) if rc > 0
+      else
+        rc = NWRFCLib.invoke(@connection.handle, @handle, @error.to_ptr)
+        #@todo Handle function exceptions by checking for :RFC_ABAP_EXCEPTION (5)
+        NWRFC.check_error(@error) if rc > 0
+      end
     end
 
     # Returns whether or not a given parameter is active, i.e. whether it will be sent to the server during the RFC

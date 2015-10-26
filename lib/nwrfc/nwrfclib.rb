@@ -61,7 +61,7 @@ if STRING_SUPPORTS_ENCODE
 
     # Convert string from UTF-8 to double-null terminated UTF-16LE string
     def cU
-      (self.dup << "\0").force_encoding('UTF-8').encode('UTF-16LE')
+      (self.to_s + "\0").force_encoding('UTF-8').encode('UTF-16LE')
     end
 
     # Convert string from UTF-16LE to UTF-8 and trim trailing whitespace

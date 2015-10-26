@@ -84,6 +84,10 @@ so that ["system2"] at the end points to whatever label you gave it in the YAML 
 
 == Release Notes
 
+=== Available in 0.0.9
+
+* Support for qRFC/tRFC
+
 === Available in 0.0.8
 
 * BigDecimal support added for BCD values (BCD is also returned as BigDecimal to cater for very big numbers like timestamps)
