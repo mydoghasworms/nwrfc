@@ -66,7 +66,7 @@ if STRING_SUPPORTS_ENCODE
 
     # Convert string from UTF-16LE to UTF-8 and trim trailing whitespace
     def uC
-      self.force_encoding('UTF-16LE').encode('UTF-8').strip
+      self.force_encoding('UTF-16LE').encode('UTF-8').rstrip
     end
 
   end
@@ -82,7 +82,7 @@ else
 
     # Convert string from UTF-16LE to UTF-8 and trim trailing whitespace
     def uC
-      NWRFCLib::Cutf16le_to_utf8.iconv(self).strip
+      NWRFCLib::Cutf16le_to_utf8.iconv(self).rstrip
     end
 
   end
