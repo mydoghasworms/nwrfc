@@ -244,24 +244,18 @@ module NWRFC
 
     # Return value as a SAP-formatted date ("YYYYMMDD"). Force value to fit into 8 chars by
     # truncating or padding with spaces
-    def value_to_date(value)
+    def value_to_date(value, padstr = ' ')
       return value.strftime(NW_DATE_FORMAT) if value.respond_to? :strftime
       # Force the resulting string into 8 characters otherwise
-      value = value.to_s
-      value << ' ' until value.size == 8 if value.size < 8
-      value = value[0..7] if value.size > 8
-      value
+      pad_str(value.to_s, padstr, 8)
     end
 
     # Return value as a SAP-formatted time ("HHMMSS"). Force value to fit into 6 chars by
     # truncating or padding with spaces
-    def value_to_time(value)
+    def value_to_time(value, padstr = ' ')
       return value.strftime(NW_TIME_FORMAT) if value.respond_to? :strftime
       # Force the resulting string into 6 characters otherwise
-      value = value.to_s
-      value << ' ' until value.size == 6 if value.size < 6
-      value = value[0..6] if value.size > 6
-      value
+      pad_str(value.to_s, padstr, 6)
     end
 
     # Return a list (array) of symbols representing the names of the fields (or parameters, in the case of a function)
@@ -303,6 +297,15 @@ module NWRFC
 
 
     private
+
+    def pad_str(str, padstr, size)
+      str.tap do
+        (size - str.size).times do
+          str << padstr
+        end
+      end
+    end
+
     # Returns the subset of metadata values common to both a function parameter
     # and a type field
     def member_to_hash(member)
